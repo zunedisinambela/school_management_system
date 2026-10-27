@@ -57,7 +57,9 @@ class RoleResource extends Resource
                                         modifyRuleUsing: fn (Unique $rule): Unique => Utils::isTenancyEnabled() ? $rule->where(Utils::getTenantModelForeignKey(), Filament::getTenant()?->id) : $rule
                                     )
                                     ->required()
-                                    ->maxLength(255),
+                                    ->maxLength(255)
+                                    // Shield's Gate::before matches the super admin role by name, so naming any role after it grants full access.
+                                    ->notIn(fn (): array => auth()->user()?->isDeveloper() ? [] : [config('filament-shield.super_admin.name')]),
 
                                 TextInput::make('guard_name')
                                     ->label(__('filament-shield::filament-shield.field.guard_name'))

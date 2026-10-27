@@ -77,6 +77,25 @@ class GrantablePermissionsTest extends TestCase
         $this->assertEqualsCanonicalizing(['ViewAny:User', 'Delete:User'], $this->permissionNamesOf('guru'));
     }
 
+    public function test_operator_cannot_name_a_role_after_the_developer_role(): void
+    {
+        $this->actingAs($this->operator);
+        $teacherRole = Role::create(['name' => 'guru']);
+        $developerRoleName = config('filament-shield.super_admin.name');
+
+        Livewire::test(CreateRole::class)
+            ->fillForm(['name' => $developerRoleName])
+            ->call('create')
+            ->assertHasFormErrors(['name' => 'not_in']);
+
+        Livewire::test(EditRole::class, ['record' => $teacherRole->getKey()])
+            ->fillForm(['name' => $developerRoleName])
+            ->call('save')
+            ->assertHasFormErrors(['name' => 'not_in']);
+
+        $this->assertDatabaseMissing('roles', ['name' => $developerRoleName]);
+    }
+
     /**
      * @return array<int, string>
      */

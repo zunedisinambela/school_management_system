@@ -182,6 +182,7 @@ Goal: a non-developer can never raise their own access or touch developer accoun
 - `RolePolicy`: non-developers cannot edit, replicate, or delete the developer role or any role they hold.
 - `UserResource` role select hides the developer role from non-developers. Filament validates submitted `multiple()` IDs against that same scoped query, so crafted requests fail too.
 - Role create/edit pages pass ticked permissions through `LimitsGrantablePermissions`: a non-developer grants only permissions they hold, and permissions outside their reach keep their previous state (`GrantablePermissionsTest`). This also stops Shield's `firstOrCreate` from minting new permission names.
+- `RoleResource` name field rejects the developer role name for non-developers. `Gate::before` matches the super admin by name, and the role may not exist in production (the seeder runs only locally), so `unique` alone would let someone create or rename a role into it.
 - `AppServiceProvider` makes every `DeleteBulkAction` call `authorizeIndividualRecords('delete')`; Filament otherwise checks only `deleteAny`, so bulk delete would skip record-level rules.
 - Developers bypass policies via `Gate::before`, so record rules meant for them too (no self-delete) live in the resource: hidden action plus `checkIfRecordIsSelectableUsing`, which Filament enforces server-side on bulk actions.
 
