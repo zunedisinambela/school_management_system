@@ -176,15 +176,16 @@ There is no route named `login`; guests redirect to `filament.admin.auth.login` 
 
 ### Escalation guards
 
-Goal: a non-developer can never raise their own access or touch developer accounts. Each guard is covered by `UserResourceTest` or `RolePolicyTest`; when changing one, mutation-check it (remove the guard, watch the test go red).
+Goal: a non-developer can never raise their own access or touch developer accounts. Each guard is covered by a test (`UserResourceTest`, `RolePolicyTest`, `GrantablePermissionsTest`); when changing one, mutation-check it (remove the guard, watch the test go red).
 
 - `UserPolicy`: non-developers cannot edit, replicate, or delete a developer account; nobody deletes their own.
 - `RolePolicy`: non-developers cannot edit, replicate, or delete the developer role or any role they hold.
 - `UserResource` role select hides the developer role from non-developers. Filament validates submitted `multiple()` IDs against that same scoped query, so crafted requests fail too.
+- Role create/edit pages pass ticked permissions through `LimitsGrantablePermissions`: a non-developer grants only permissions they hold, and permissions outside their reach keep their previous state (`GrantablePermissionsTest`). This also stops Shield's `firstOrCreate` from minting new permission names.
 - `AppServiceProvider` makes every `DeleteBulkAction` call `authorizeIndividualRecords('delete')`; Filament otherwise checks only `deleteAny`, so bulk delete would skip record-level rules.
 - Developers bypass policies via `Gate::before`, so record rules meant for them too (no self-delete) live in the resource: hidden action plus `checkIfRecordIsSelectableUsing`, which Filament enforces server-side on bulk actions.
 
-Open gap: a non-developer holding `Create:Role` and `Update:User` can create a role with any permissions and assign it to themselves. Until the role form limits grants to the actor's own permissions, grant `Create:Role` to developers only.
+Shield's `RoleResource` is published to `app/Filament/Resources/Roles` (config `resources.manage` points there; the plugin then skips the vendor copy). `shield:publish --force` would overwrite the create/edit page wiring for `LimitsGrantablePermissions`.
 
 ## User monitoring (binafy/laravel-user-monitoring)
 

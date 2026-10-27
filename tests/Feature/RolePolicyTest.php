@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Resources\Roles\Pages\ListRoles;
 use App\Models\User;
-use BezhanSalleh\FilamentShield\Resources\Roles\Pages\ListRoles;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;

@@ -3,9 +3,9 @@
 declare(strict_types=1);
 use App\Filament\Resources\ActionMonitorings\ActionMonitoringResource;
 use App\Filament\Resources\AuthenticationMonitorings\AuthenticationMonitoringResource;
+use App\Filament\Resources\Roles\RoleResource;
 use App\Filament\Resources\Users\UserResource;
 use App\Filament\Resources\VisitMonitorings\VisitMonitoringResource;
-use BezhanSalleh\FilamentShield\Resources\Roles\RoleResource;
 use Filament\Pages\Dashboard;
 use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
