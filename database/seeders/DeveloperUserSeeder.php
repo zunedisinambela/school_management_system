@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 class DeveloperUserSeeder extends Seeder
@@ -26,11 +27,14 @@ class DeveloperUserSeeder extends Seeder
             'email_verified_at' => now(),
         ])->save();
 
-        $superAdmin = Role::firstOrCreate([
+        $developer = Role::firstOrCreate([
             'name' => config('filament-shield.super_admin.name'),
             'guard_name' => 'web',
         ]);
 
-        $user->assignRole($superAdmin);
+        // Access is already granted via Shield's Gate::before; syncing makes it visible in the role editor.
+        $developer->syncPermissions(Permission::where('guard_name', 'web')->get());
+
+        $user->assignRole($developer);
     }
 }

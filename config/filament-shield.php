@@ -1,6 +1,9 @@
 <?php
 
 declare(strict_types=1);
+use App\Filament\Resources\ActionMonitorings\ActionMonitoringResource;
+use App\Filament\Resources\AuthenticationMonitorings\AuthenticationMonitoringResource;
+use App\Filament\Resources\VisitMonitorings\VisitMonitoringResource;
 use BezhanSalleh\FilamentShield\Resources\Roles\RoleResource;
 use Filament\Pages\Dashboard;
 use Filament\Widgets\AccountWidget;
@@ -70,7 +73,7 @@ return [
 
     'super_admin' => [
         'enabled' => true,
-        'name' => 'super_admin',
+        'name' => 'developer',
         'define_via_gate' => true,
         'intercept_gate' => 'before',
     ],
@@ -140,7 +143,7 @@ return [
 
     'policies' => [
         'path' => app_path('Policies'),
-        'merge' => true,
+        'merge' => false,
         'generate' => true,
         'methods' => [
             'viewAny', 'view', 'create', 'update', 'delete', 'deleteAny', 'restore',
@@ -192,6 +195,24 @@ return [
                 'create',
                 'update',
                 'delete',
+            ],
+            VisitMonitoringResource::class => [
+                'viewAny',
+                'view',
+                'delete',
+                'deleteAny',
+            ],
+            ActionMonitoringResource::class => [
+                'viewAny',
+                'view',
+                'delete',
+                'deleteAny',
+            ],
+            AuthenticationMonitoringResource::class => [
+                'viewAny',
+                'view',
+                'delete',
+                'deleteAny',
             ],
         ],
         'exclude' => [
