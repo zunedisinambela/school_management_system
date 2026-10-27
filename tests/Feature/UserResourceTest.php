@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Filament\Resources\Users\Pages\ManageUsers;
 use App\Models\User;
 use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\Testing\TestAction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -101,6 +102,22 @@ class UserResourceTest extends TestCase
 
         Livewire::test(ManageUsers::class)
             ->assertActionHidden(TestAction::make(DeleteAction::class)->table($operator));
+    }
+
+    public function test_bulk_delete_skips_protected_accounts(): void
+    {
+        $operator = $this->makeUser($this->operatorRole);
+        $this->actingAs($operator);
+        $developer = $this->makeUser($this->developerRole);
+        $regularUser = $this->makeUser($this->operatorRole);
+
+        Livewire::test(ManageUsers::class)
+            ->selectTableRecords([$developer->getKey(), $operator->getKey(), $regularUser->getKey()])
+            ->callAction(TestAction::make(DeleteBulkAction::class)->table()->bulk());
+
+        $this->assertModelExists($developer);
+        $this->assertModelExists($operator);
+        $this->assertModelMissing($regularUser);
     }
 
     private function makeUser(Role $role): User
