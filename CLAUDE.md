@@ -157,7 +157,7 @@ Three layers, in order:
 
 1. `User::canAccessPanel()` gates panel entry. Without `FilamentUser`, Filament returns 403 for everyone outside `APP_ENV=local`.
 2. Policies in `app/Policies` gate each resource via Shield permissions (`Action:Model`, pascal case).
-3. Role `developer` is Shield's super admin (`filament-shield.super_admin.name`), granted everything through `Gate::before`. Reference the role via that config key, never a literal.
+3. Role `developer` is Shield's super admin (`filament-shield.super_admin.name`), granted everything through `Gate::before`. Check it with `User::isDeveloper()`; elsewhere reference the role via that config key, never a literal.
 
 Shield config has `policies.merge => true`: every resource gets all 12 `policies.methods` (the user wants the full set visible), plus anything extra listed in `resources.manage`. Restore/force-delete permissions only take effect on models with `SoftDeletes`, replicate needs `ReplicateAction`, reorder needs `->reorderable()`.
 
@@ -168,18 +168,23 @@ php artisan shield:generate --resource=FooResource --panel=admin -n
 php artisan db:seed --class=DeveloperUserSeeder   # syncs all permissions to developer so the role editor shows them
 ```
 
-`shield:generate` rewrites existing policies unless given `--ignore-existing-policies`. `UserPolicy` and `RolePolicy` are hand-edited, so always pass that flag when regenerating everything:
-
-- `UserPolicy`: non-developers cannot edit, replicate, or delete a developer account; nobody deletes their own.
-- `RolePolicy`: non-developers cannot edit, replicate, or delete the developer role or any role they hold.
-
-`AppServiceProvider` makes every `DeleteBulkAction` call `authorizeIndividualRecords('delete')`; Filament otherwise checks only `deleteAny`, letting bulk delete bypass record-level policy rules.
-
-`UserResource` shows only non-developer roles to non-developers; Filament validates submitted `multiple()` select IDs against that same scoped query, which blocks role escalation through crafted requests (covered by `UserResourceTest`).
+`shield:generate` rewrites existing policies unless given `--ignore-existing-policies`. Pass that flag whenever regenerating everything, or the hand-edited guards below are lost.
 
 A model outside `App\Models` (vendor packages) needs `Gate::policy()` in `AppServiceProvider`; Laravel's policy discovery misses it, and Filament then allows every panel user.
 
 There is no route named `login`; guests redirect to `filament.admin.auth.login` (`bootstrap/app.php`).
+
+### Escalation guards
+
+Goal: a non-developer can never raise their own access or touch developer accounts. Each guard is covered by `UserResourceTest` or `RolePolicyTest`; when changing one, mutation-check it (remove the guard, watch the test go red).
+
+- `UserPolicy`: non-developers cannot edit, replicate, or delete a developer account; nobody deletes their own.
+- `RolePolicy`: non-developers cannot edit, replicate, or delete the developer role or any role they hold.
+- `UserResource` role select hides the developer role from non-developers. Filament validates submitted `multiple()` IDs against that same scoped query, so crafted requests fail too.
+- `AppServiceProvider` makes every `DeleteBulkAction` call `authorizeIndividualRecords('delete')`; Filament otherwise checks only `deleteAny`, so bulk delete would skip record-level rules.
+- Developers bypass policies via `Gate::before`, so record rules meant for them too (no self-delete) live in the resource: hidden action plus `checkIfRecordIsSelectableUsing`, which Filament enforces server-side on bulk actions.
+
+Open gap: a non-developer holding `Create:Role` and `Update:User` can create a role with any permissions and assign it to themselves. Until the role form limits grants to the actor's own permissions, grant `Create:Role` to developers only.
 
 ## User monitoring (binafy/laravel-user-monitoring)
 
