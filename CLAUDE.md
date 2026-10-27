@@ -159,7 +159,7 @@ Three layers, in order:
 2. Policies in `app/Policies` gate each resource via Shield permissions (`Action:Model`, pascal case).
 3. Role `developer` is Shield's super admin (`filament-shield.super_admin.name`), granted everything through `Gate::before`. Reference the role via that config key, never a literal.
 
-Shield config has `policies.merge => false`: a resource listed in `resources.manage` gets exactly those methods. Read-only resources (monitoring logs) list only `viewAny`, `view`, `delete`, `deleteAny`.
+Shield config has `policies.merge => true`: every resource gets all 12 `policies.methods` (the user wants the full set visible), plus anything extra listed in `resources.manage`. Restore/force-delete permissions only take effect on models with `SoftDeletes`, replicate needs `ReplicateAction`, reorder needs `->reorderable()`.
 
 Adding a resource:
 

@@ -44,4 +44,36 @@ class UserPolicy
     {
         return $authUser->can('DeleteAny:User');
     }
+
+    public function restore(AuthUser $authUser): bool
+    {
+        return $authUser->can('Restore:User');
+    }
+
+    public function forceDelete(AuthUser $authUser, User $user): bool
+    {
+        return $authUser->can('ForceDelete:User')
+            && ! $user->isDeveloper()
+            && ! $user->is($authUser);
+    }
+
+    public function forceDeleteAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('ForceDeleteAny:User');
+    }
+
+    public function restoreAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('RestoreAny:User');
+    }
+
+    public function replicate(AuthUser $authUser, User $user): bool
+    {
+        return $authUser->can('Replicate:User') && ! $user->isDeveloper();
+    }
+
+    public function reorder(AuthUser $authUser): bool
+    {
+        return $authUser->can('Reorder:User');
+    }
 }

@@ -144,7 +144,7 @@ return [
 
     'policies' => [
         'path' => app_path('Policies'),
-        'merge' => false,
+        'merge' => true,
         'generate' => true,
         'methods' => [
             'viewAny', 'view', 'create', 'update', 'delete', 'deleteAny', 'restore',
