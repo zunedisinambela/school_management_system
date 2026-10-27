@@ -29,12 +29,12 @@ class RolePolicy
 
     public function update(AuthUser $authUser, Role $role): bool
     {
-        return $authUser->can('Update:Role');
+        return $authUser->can('Update:Role') && ! $this->isProtected($authUser, $role);
     }
 
     public function delete(AuthUser $authUser, Role $role): bool
     {
-        return $authUser->can('Delete:Role');
+        return $authUser->can('Delete:Role') && ! $this->isProtected($authUser, $role);
     }
 
     public function deleteAny(AuthUser $authUser): bool
@@ -49,7 +49,7 @@ class RolePolicy
 
     public function forceDelete(AuthUser $authUser, Role $role): bool
     {
-        return $authUser->can('ForceDelete:Role');
+        return $authUser->can('ForceDelete:Role') && ! $this->isProtected($authUser, $role);
     }
 
     public function forceDeleteAny(AuthUser $authUser): bool
@@ -64,11 +64,21 @@ class RolePolicy
 
     public function replicate(AuthUser $authUser, Role $role): bool
     {
-        return $authUser->can('Replicate:Role');
+        return $authUser->can('Replicate:Role') && ! $this->isProtected($authUser, $role);
     }
 
     public function reorder(AuthUser $authUser): bool
     {
         return $authUser->can('Reorder:Role');
+    }
+
+    /**
+     * Changing the developer role, or a role the actor holds, would let a non-developer raise their own access.
+     * Developers never reach this check: Shield's Gate::before grants them everything first.
+     */
+    private function isProtected(AuthUser $authUser, Role $role): bool
+    {
+        return $role->name === config('filament-shield.super_admin.name')
+            || $authUser->hasRole($role);
     }
 }

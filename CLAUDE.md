@@ -168,7 +168,12 @@ php artisan shield:generate --resource=FooResource --panel=admin -n
 php artisan db:seed --class=DeveloperUserSeeder   # syncs all permissions to developer so the role editor shows them
 ```
 
-`shield:generate` rewrites existing policies unless given `--ignore-existing-policies`. `UserPolicy` is hand-edited (non-developers cannot edit or delete a developer account), so always pass that flag when regenerating everything.
+`shield:generate` rewrites existing policies unless given `--ignore-existing-policies`. `UserPolicy` and `RolePolicy` are hand-edited, so always pass that flag when regenerating everything:
+
+- `UserPolicy`: non-developers cannot edit, replicate, or delete a developer account; nobody deletes their own.
+- `RolePolicy`: non-developers cannot edit, replicate, or delete the developer role or any role they hold.
+
+`AppServiceProvider` makes every `DeleteBulkAction` call `authorizeIndividualRecords('delete')`; Filament otherwise checks only `deleteAny`, letting bulk delete bypass record-level policy rules.
 
 `UserResource` shows only non-developer roles to non-developers; Filament validates submitted `multiple()` select IDs against that same scoped query, which blocks role escalation through crafted requests (covered by `UserResourceTest`).
 
