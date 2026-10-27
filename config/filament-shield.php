@@ -3,6 +3,7 @@
 declare(strict_types=1);
 use App\Filament\Resources\ActionMonitorings\ActionMonitoringResource;
 use App\Filament\Resources\AuthenticationMonitorings\AuthenticationMonitoringResource;
+use App\Filament\Resources\Users\UserResource;
 use App\Filament\Resources\VisitMonitorings\VisitMonitoringResource;
 use BezhanSalleh\FilamentShield\Resources\Roles\RoleResource;
 use Filament\Pages\Dashboard;
@@ -211,6 +212,14 @@ return [
             AuthenticationMonitoringResource::class => [
                 'viewAny',
                 'view',
+                'delete',
+                'deleteAny',
+            ],
+            UserResource::class => [
+                'viewAny',
+                'view',
+                'create',
+                'update',
                 'delete',
                 'deleteAny',
             ],

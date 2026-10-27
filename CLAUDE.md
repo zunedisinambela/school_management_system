@@ -168,6 +168,10 @@ php artisan shield:generate --resource=FooResource --panel=admin -n
 php artisan db:seed --class=DeveloperUserSeeder   # syncs all permissions to developer so the role editor shows them
 ```
 
+`shield:generate` rewrites existing policies unless given `--ignore-existing-policies`. `UserPolicy` is hand-edited (non-developers cannot edit or delete a developer account), so always pass that flag when regenerating everything.
+
+`UserResource` shows only non-developer roles to non-developers; Filament validates submitted `multiple()` select IDs against that same scoped query, which blocks role escalation through crafted requests (covered by `UserResourceTest`).
+
 A model outside `App\Models` (vendor packages) needs `Gate::policy()` in `AppServiceProvider`; Laravel's policy discovery misses it, and Filament then allows every panel user.
 
 There is no route named `login`; guests redirect to `filament.admin.auth.login` (`bootstrap/app.php`).

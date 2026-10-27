@@ -30,6 +30,14 @@ class User extends Authenticatable implements FilamentUser
     }
 
     /**
+     * Whether the user holds Shield's super admin role, which bypasses every permission check.
+     */
+    public function isDeveloper(): bool
+    {
+        return $this->hasRole(config('filament-shield.super_admin.name'));
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
